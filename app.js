@@ -3,23 +3,22 @@
 
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import { master_password, menu } from './inquirers.js';
 
-const start = () => {
+const greeting = () => {
     console.log(chalk.green("Welcome"));
     console.log("");
     console.log(chalk.blue("Create master password! You are going to need this everytime you login"));
-    inquirer
-        .prompt([
-            {
-                name: 'master password',
-                type: 'password',
-                mask: '*',
-                message: 'Enter your password'
-            }
-        ])
-        .then((answer) => {
-            console.log(answer);
-        })
+}
+
+const start = async() => {
+    greeting();
+    let valid_password = await master_password();
+    while (valid_password == false) {
+        console.log(chalk.red("Invalid password. Try Again."));
+        valid_password = await master_password();
+    }
+    menu();
 }
 
 const main = () => {
