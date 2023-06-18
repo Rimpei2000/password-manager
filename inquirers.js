@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 
-async function master_password() {
+const master_password_inq = async() => {
     const valid = await inquirer
         .prompt([
             {
@@ -25,15 +25,14 @@ async function master_password() {
                 .then((reenter) => {
                     return answer['master password'] == reenter['master password re-enter'];
                 })
-            return valid
+            return valid;
         });
-
         return valid;
 }
 
-function menu() {
+const menu_inq = async() => {
     console.clear();
-    inquirer
+    const menu_option = await inquirer
         .prompt([
             {
                 name: 'menu',
@@ -50,11 +49,56 @@ function menu() {
             }
         ])
         .then(answer => {
-            console.log(answer)
-        })
+            return answer
+        });
+    return menu_option;
+}
+
+const generate_inq = async() => {
+    console.clear();
+    const service_name_id = await inquirer
+        .prompt([
+            {
+                name: 'service_name',
+                message: 'What is the name of the service?',
+            }
+        ])
+        .then(async(name) => {
+            console.clear();
+            const id = await inquirer
+                .prompt([
+                    {
+                        name: 'account_id',
+                        message: 'What is your account ID?'
+                    }
+                ])
+                .then(id => {
+                    return id;
+                });
+            return [name, id];
+        });
+    return service_name_id;
+}
+
+const padlocks_inq = (raw_padlocks) => {
+    const padlocks = raw_padlocks.map(item => 
+        `Service: ${item.service_name}\t\t\tID: ${item.account_id}`
+      );
+    console.clear();
+    inquirer
+        .prompt([
+            {
+                name: 'padlocks',
+                message: 'Which padlock do you want to open?',
+                type: 'list',
+                choices: padlocks
+            }
+        ])
 }
 
 export {
-    master_password,
-    menu
+    master_password_inq,
+    menu_inq,
+    generate_inq,
+    padlocks_inq
 }
