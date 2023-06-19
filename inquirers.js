@@ -54,7 +54,7 @@ const menu_inq = async() => {
     return menu_option;
 }
 
-const generate_inq = async() => {
+const service_name_account_id_inq = async() => {
     console.clear();
     const service_name_id = await inquirer
         .prompt([
@@ -124,10 +124,25 @@ const continue_inq = async() => {
     return res;
 }
 
+const delete_inq = async() => {
+    const res = await inquirer
+        .prompt([
+            {
+                name: 'service_name',
+                message: 'Which service do you want to delete?',
+                type: 'input'
+            }
+        ])
+        .then(answer => {
+            const service_name = answer['service_name'];
+
+        })
+}
+
 export {
     master_password_inq,
     menu_inq,
-    generate_inq,
+    service_name_account_id_inq,
     padlocks_inq,
     continue_inq
 }

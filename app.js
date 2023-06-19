@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import sqlite3 from 'sqlite3';
 import { 
     continue_inq,
-    generate_inq,
+    service_name_account_id_inq,
     master_password_inq,
     menu_inq,
     padlocks_inq,
@@ -62,7 +62,7 @@ const store = async() => {
 }
 
 const generate = async() => {
-    const info = await generate_inq();
+    const info = await service_name_account_id_inq();
     const service_name = info[0]['service_name'];
     const account_id = info[1]['account_id'];
     const generated_password = generate_password();
@@ -84,14 +84,36 @@ const generate = async() => {
 }
 
 const deletion = async() => {
-    console.log("dele");
+    try {
+        const info = await service_name_account_id_inq();
+        const service_name = info[0]['service_name'];
+        const account_id = info[1]['account_id'];
+        const sql = `DELETE FROM Passwords
+            WHERE service_name='${service_name}' AND account_id='${account_id}'
+        `;
+        const res = await sql_query(db, sql);
+        const additional_message = `Successfully deleted the password of Service: ${service_name} ID: ${account_id}`;
+    
+        const next_option = await continue_loop({ "message": additional_message });
+        return next_option;
+    } catch(err) {
+        console.error(err.message);
+    }
+
+    
 }
 
 const quit = () => {
     return "quit"
 }
 
-const continue_loop = async() => {
+const continue_loop = async(obj) => {
+
+    if (obj) {
+        // console.log(obj[]);
+        // return
+        console.log(chalk.red(obj.message))
+    }
     const y_or_n = await continue_inq();
     if (y_or_n == "y") {
         let option =  await menu();
