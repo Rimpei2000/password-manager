@@ -1,6 +1,3 @@
-// node app.js
-// Welcome , Create master password! accept userinput, (? Enter your password) -> re-enter -> main menu
-
 import chalk from 'chalk';
 import sqlite3 from 'sqlite3';
 import { 
@@ -12,6 +9,7 @@ import {
 } from './inquirers.js';
 import {
     generate_password,
+    sql_query,
 } from './utils.js';
 let db;
 
@@ -26,65 +24,32 @@ const init_db = () => {
         if (err) return console.error(err.message);
     })
 
-    db.run(
-        `CREATE TABLE IF NOT EXISTS Passwords (
-            service_name VARCHAR(255) NOT NULL,
-            account_id VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            PRIMARY KEY (service_name, account_id)
-        )`
-    );
+    const sql = `CREATE TABLE IF NOT EXISTS Passwords (
+        service_name VARCHAR(255) NOT NULL,
+        account_id VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        PRIMARY KEY (service_name, account_id)
+    )`;
 
-    // db.run(
-    //     `INSERT INTO Passwords (
-    //         service_name,
-    //         account_id,
-    //         password
-    //     ) VALUES (
-    //         'google.com',
-    //         'ggg',
-    //         'ggg'
-    //     )`
-    // );
+    sql_query(db, sql);
 }
 
 const show = async () => {
     let sql = `SELECT * FROM Passwords`;
   
     try {
-        const rows = await new Promise((resolve, reject) => {
-            db.all(sql, [], (err, rows) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(rows);
-            }
-            });
-        });
+        const rows = await sql_query(db, sql);
         const chosen_padlock = await padlocks_inq(rows);
         const service_name = chosen_padlock.split(" ")[1].split("\t")[0];
         const account_id = chosen_padlock.split(" ")[2];
 
         sql = `SELECT password FROM Passwords WHERE service_name='${service_name}' AND account_id='${account_id}'`;
-        const data = await new Promise((resolve, reject) => {
-            db.all(sql, [], (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
-            });
-        });
+        const data = await sql_query(db, sql);
 
         const password = data[0]['password'];
         console.log(chalk.cyan(`Your password: ${password}`));
-        const y_or_n = await continue_inq();
-        if (y_or_n == "y") {
-            let option =  await menu();
-            return option;
-        } else {
-            return "quit"
-        }
+        const next_option = await continue_loop();
+        return next_option;
     } catch (err) {
         console.error(err);
     }
@@ -92,7 +57,8 @@ const show = async () => {
 
 const store = async() => {
     console.log("store");
-    console.log(await continue_inq());
+    const next_option = await continue_loop();
+    return next_option;
 }
 
 const generate = async() => {
@@ -109,16 +75,12 @@ const generate = async() => {
         '${account_id}',
         '${generated_password}'
     )`;
-    db.run(sql);
+    sql_query(db, sql);
     console.log(chalk.green("Password created!"));
     console.log(chalk.cyan("Your new password: " + generated_password + " is now stored in the database!"));
-    const y_or_n = await continue_inq();
-    if (y_or_n == "y") {
-        let option =  await menu();
-        return option;
-    } else {
-        return "quit"
-    }
+
+    const next_option = await continue_loop();
+    return next_option;
 }
 
 const deletion = async() => {
@@ -127,6 +89,16 @@ const deletion = async() => {
 
 const quit = () => {
     return "quit"
+}
+
+const continue_loop = async() => {
+    const y_or_n = await continue_inq();
+    if (y_or_n == "y") {
+        let option =  await menu();
+        return option;
+    } else {
+        return "quit"
+    }
 }
 
 const init = async() => {
