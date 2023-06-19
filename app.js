@@ -61,7 +61,6 @@ const show = async () => {
             }
             });
         });
-  
         const chosen_padlock = await padlocks_inq(rows);
         const service_name = chosen_padlock.split(" ")[1].split("\t")[0];
         const account_id = chosen_padlock.split(" ")[2];
@@ -101,8 +100,25 @@ const generate = async() => {
     const service_name = info[0]['service_name'];
     const account_id = info[1]['account_id'];
     const generated_password = generate_password();
+    const sql = `INSERT INTO Passwords (
+        service_name,
+        account_id,
+        password
+    ) VALUES (
+        '${service_name}',
+        '${account_id}',
+        '${generated_password}'
+    )`;
+    db.run(sql);
     console.log(chalk.green("Password created!"));
-    console.log(chalk.cyan("Your new password: " + generated_password));
+    console.log(chalk.cyan("Your new password: " + generated_password + " is now stored in the database!"));
+    const y_or_n = await continue_inq();
+    if (y_or_n == "y") {
+        let option =  await menu();
+        return option;
+    } else {
+        return "quit"
+    }
 }
 
 const deletion = async() => {
