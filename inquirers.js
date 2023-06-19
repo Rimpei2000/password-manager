@@ -80,12 +80,12 @@ const generate_inq = async() => {
     return service_name_id;
 }
 
-const padlocks_inq = (raw_padlocks) => {
+const padlocks_inq = async(raw_padlocks) => {
     const padlocks = raw_padlocks.map(item => 
         `Service: ${item.service_name}\t\t\tID: ${item.account_id}`
       );
     console.clear();
-    inquirer
+    const chosen_padlock = await inquirer
         .prompt([
             {
                 name: 'padlocks',
@@ -94,11 +94,40 @@ const padlocks_inq = (raw_padlocks) => {
                 choices: padlocks
             }
         ])
+        .then(answer => {
+            return answer['padlocks'];
+        });
+    
+    return chosen_padlock;
+}
+
+const continue_inq = async() => {
+    const res = await inquirer
+        .prompt([
+            {
+                name: 'continue',
+                message: 'Do you want to continue? (y/n)',
+                type: 'input',
+                validate: function(input) {
+                    const isValid = /^y|n$/i.test(input); // Validates if input is either 'y' or 'n' (case-insensitive)
+                    if (isValid) {
+                    return true;
+                    }
+                    return 'Please enter either "y" for Yes or "n" for No.';
+                },
+            }
+        ])
+        .then(answer => {
+            return answer['continue'];
+        });
+
+    return res;
 }
 
 export {
     master_password_inq,
     menu_inq,
     generate_inq,
-    padlocks_inq
+    padlocks_inq,
+    continue_inq
 }
