@@ -81,9 +81,10 @@ const service_name_account_id_inq = async() => {
 }
 
 const padlocks_inq = async(raw_padlocks) => {
-    const padlocks = raw_padlocks.map(item => 
+    let padlocks = raw_padlocks.map(item => 
         `Service: ${item.service_name}\t\t\tID: ${item.account_id}`
       );
+    padlocks.push("Back")
     console.clear();
     const chosen_padlock = await inquirer
         .prompt([

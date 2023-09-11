@@ -40,14 +40,17 @@ const show = async () => {
     try {
         const rows = await sql_query(db, sql);
         const chosen_padlock = await padlocks_inq(rows);
-        const service_name = chosen_padlock.split(" ")[1].split("\t")[0];
-        const account_id = chosen_padlock.split(" ")[2];
-
-        sql = `SELECT password FROM Passwords WHERE service_name='${service_name}' AND account_id='${account_id}'`;
-        const data = await sql_query(db, sql);
-
-        const password = data[0]['password'];
-        console.log(chalk.cyan(`Your password: ${password}`));
+        if (chosen_padlock != "Back") {
+            const service_name = chosen_padlock.split(" ")[1].split("\t")[0];
+            const account_id = chosen_padlock.split(" ")[2];
+    
+            sql = `SELECT password FROM Passwords WHERE service_name='${service_name}' AND account_id='${account_id}'`;
+            const data = await sql_query(db, sql);
+    
+            const password = data[0]['password'];
+            console.log(chalk.cyan(`Your password: ${password}`));
+        } 
+        
         const next_option = await continue_loop();
         return next_option;
     } catch (err) {
