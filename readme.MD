@@ -1,5 +1,5 @@
 progress
 - [-] show
 - [] store
-- [] generate
+- [-] generate
 - [] delete
