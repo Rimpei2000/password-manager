@@ -35,6 +35,17 @@ const init_db = () => {
   sql_query(db, sql);
 };
 
+const doesDuplicateExist = async (service_name_input, account_id_input) => {
+  let sql = `SELECT * FROM Passwords`;
+  const data = await sql_query(db, sql);
+  return data.some((item) => {
+    return (
+      item.service_name == service_name_input &&
+      item.account_id == account_id_input
+    );
+  });
+};
+
 const show = async () => {
   let sql = `SELECT * FROM Passwords`;
 
@@ -60,23 +71,9 @@ const show = async () => {
 };
 
 const store = async () => {
-  console.log("store");
+  
   const next_option = await continue_loop();
   return next_option;
-};
-
-const doesDuplicateExist = async (service_name, account_id) => {
-  let sql = `SELECT * FROM Passwords`;
-  const rows = await sql_query(db, sql);
-  const pairsSet = new Set(
-    rows.map((item) => [item.service_name, item.account_id])
-  );
-  for (const pair of pairsSet) {
-    if (pair[0] === service_name && pair[1] === account_id) {
-      return true;
-    }
-  }
-  return false;
 };
 
 const generate = async () => {
@@ -87,7 +84,7 @@ const generate = async () => {
   if (service_name == "" || account_id == "") {
     console.log(chalk.red("Invalid service name or account id!"));
     console.log(chalk.red("Please try again!"));
-  } else if (doesDuplicateExist(service_name, account_id)) {
+  } else if (await doesDuplicateExist(service_name, account_id)) {
     console.log(chalk.red("This pair already exists in db!"));
     console.log(chalk.red("Please check db!"));
   } else {
