@@ -1,5 +1,8 @@
 progress
 - [-] show
-- [] store
+- [-] store
 - [-] generate
 - [] delete
+
+Upcoming 
+- [] updating password
