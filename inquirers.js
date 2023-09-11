@@ -81,6 +81,17 @@ const service_name_account_id_inq = async () => {
   return service_name_id;
 };
 
+const service_name_account_id_password_inq = async () => {
+  const info = await service_name_account_id_inq();
+  console.clear();
+  const password = await inquirer
+    .prompt([{ name: "password", message: "What is your password?" }])
+    .then((password) => {
+      return password;
+    });
+  return [...info, password];
+};
+
 const padlocks_inq = async (raw_padlocks) => {
   let padlocks = raw_padlocks.map(
     (item) => `Service: ${item.service_name}\t\t\tID: ${item.account_id}`
@@ -144,6 +155,7 @@ export {
   master_password_inq,
   menu_inq,
   service_name_account_id_inq,
+  service_name_account_id_password_inq,
   padlocks_inq,
   continue_inq,
 };

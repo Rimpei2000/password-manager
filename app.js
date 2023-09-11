@@ -3,6 +3,7 @@ import sqlite3 from "sqlite3";
 import {
   continue_inq,
   service_name_account_id_inq,
+  service_name_account_id_password_inq,
   master_password_inq,
   menu_inq,
   padlocks_inq,
@@ -71,7 +72,35 @@ const show = async () => {
 };
 
 const store = async () => {
-  
+  const info = await service_name_account_id_password_inq();
+  const service_name = info[0]["service_name"];
+  const account_id = info[1]["account_id"];
+  const password = info[2]["password"];
+  // console.log(service_name, account_id, password);
+  if (service_name == "" || account_id == "" || password == "") {
+    console.log(chalk.red("Please check your inputs and try again!"));
+  } else if (await doesDuplicateExist(service_name, account_id)) {
+    console.log(chalk.red("This pair already exists in db!"));
+    console.log(chalk.red("Please check db!"));
+  } else {
+    const sql = `INSERT INTO Passwords (
+      service_name,
+      account_id,
+      password
+  ) VALUES (
+      '${service_name}',
+      '${account_id}',
+      '${password}'
+  )`;
+    sql_query(db, sql);
+    console.log(chalk.green("Password stored!"));
+    console.log(
+      chalk.cyan(
+        "Your password: " + password + " is now stored in the database!"
+      )
+    );
+  }
+
   const next_option = await continue_loop();
   return next_option;
 };
@@ -80,7 +109,7 @@ const generate = async () => {
   const info = await service_name_account_id_inq();
   const service_name = info[0]["service_name"];
   const account_id = info[1]["account_id"];
-  const pair = [service_name, account_id];
+
   if (service_name == "" || account_id == "") {
     console.log(chalk.red("Invalid service name or account id!"));
     console.log(chalk.red("Please try again!"));
