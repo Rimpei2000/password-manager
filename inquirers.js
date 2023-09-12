@@ -92,7 +92,7 @@ const service_name_account_id_password_inq = async () => {
   return [...info, password];
 };
 
-const padlocks_inq = async (raw_padlocks) => {
+const padlocks_inq = async (raw_padlocks, type) => {
   let padlocks = raw_padlocks.map(
     (item) => `Service: ${item.service_name}\t\t\tID: ${item.account_id}`
   );
@@ -103,7 +103,7 @@ const padlocks_inq = async (raw_padlocks) => {
       {
         name: "padlocks",
         message: "Which padlock do you want to open?",
-        type: "list",
+        type: type,
         choices: padlocks,
       },
     ])

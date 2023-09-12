@@ -52,7 +52,7 @@ const show = async () => {
 
   try {
     const rows = await sql_query(db, sql);
-    const chosen_padlock = await padlocks_inq(rows);
+    const chosen_padlock = await padlocks_inq(rows, "list");
     if (chosen_padlock != "Back") {
       const service_name = chosen_padlock.split(" ")[1].split("\t")[0];
       const account_id = chosen_padlock.split(" ")[2];
@@ -76,7 +76,6 @@ const store = async () => {
   const service_name = info[0]["service_name"];
   const account_id = info[1]["account_id"];
   const password = info[2]["password"];
-  // console.log(service_name, account_id, password);
   if (service_name == "" || account_id == "" || password == "") {
     console.log(chalk.red("Please check your inputs and try again!"));
   } else if (await doesDuplicateExist(service_name, account_id)) {
@@ -144,17 +143,46 @@ const generate = async () => {
 
 const deletion = async () => {
   try {
-    const info = await service_name_account_id_inq();
-    const service_name = info[0]["service_name"];
-    const account_id = info[1]["account_id"];
-    const sql = `DELETE FROM Passwords
-            WHERE service_name='${service_name}' AND account_id='${account_id}'
-        `;
-    const res = await sql_query(db, sql);
-    const additional_message = `Successfully deleted the password of Service: ${service_name} ID: ${account_id}`;
+    let list_sql = `SELECT * FROM Passwords`;
+    const rows = await sql_query(db, list_sql);
+    const chosen_padlock = await padlocks_inq(rows, "checkbox");
 
-    const next_option = await continue_loop({ message: additional_message });
-    return next_option;
+    if (chosen_padlock.length > 0) {
+      if (chosen_padlock.includes("Back")) {
+        const next_option = await continue_loop({
+          message: "'Back' cannot be deleted",
+        });
+        return next_option;
+      } else {
+        let deleteItemList = [];
+        chosen_padlock.map((item) => {
+          const itemArr = [];
+          const service_name = item.split("\t")[0].split(" ")[1];
+          const words = item.split(" ");
+          const account_id = words[words.length - 1];
+
+          itemArr.push(service_name);
+          itemArr.push(account_id);
+          deleteItemList.push(itemArr);
+        });
+
+        for (const deleteItem of deleteItemList) {
+          console.log(deleteItem[0]);
+          console.log(deleteItem[1]);
+          const sql = `DELETE FROM Passwords
+            WHERE service_name='${deleteItem[0]}' AND account_id='${deleteItem[1]}'
+        `;
+          await sql_query(db, sql);
+        }
+        const next_option = await continue_loop({
+          message: "Deleted selected items",
+        });
+        return next_option;
+      }
+    } else {
+      const next_option = await continue_loop({ message: "No Item Selected" });
+      return next_option;
+    }
   } catch (err) {
     console.error(err.message);
   }
@@ -166,8 +194,6 @@ const quit = () => {
 
 const continue_loop = async (obj) => {
   if (obj) {
-    // console.log(obj[]);
-    // return
     console.log(chalk.red(obj.message));
   }
   const y_or_n = await continue_inq();
