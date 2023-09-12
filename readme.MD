@@ -2,7 +2,7 @@ progress
 - [-] show
 - [-] store
 - [-] generate
-- [] delete
+- [-] delete
 
 Upcoming 
 - [] updating password
