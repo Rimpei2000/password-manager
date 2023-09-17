@@ -167,8 +167,6 @@ const deletion = async () => {
         });
 
         for (const deleteItem of deleteItemList) {
-          console.log(deleteItem[0]);
-          console.log(deleteItem[1]);
           const sql = `DELETE FROM Passwords
             WHERE service_name='${deleteItem[0]}' AND account_id='${deleteItem[1]}'
         `;
